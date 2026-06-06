@@ -1,5 +1,5 @@
 import streamlit as st
-import pyttsx3
+from gtts import gTTS
 import os
 from PIL import Image
 import requests
@@ -157,28 +157,19 @@ elif page == "故事讲述":
     st.markdown("---")
     st.markdown(selected_story['content'])
     
-    # 本地语音讲述功能
+    # 语音讲述功能
     st.markdown("---")
-    if st.button("🔊 播放语音讲述", help="点击生成本地语音，聆听故事的音频版本，不需要联网！"):
-        with st.spinner("正在本地生成语音，请稍候..."):
+    if st.button("🔊 播放语音讲述", help="点击生成语音，聆听故事的音频版本"):
+        with st.spinner("正在生成语音，请稍候..."):
             try:
-                # 初始化本地TTS
-                engine = pyttsx3.init()
-                # 设置中文语音
-                voices = engine.getProperty('voices')
-                # 尝试找到中文语音
-                for voice in voices:
-                    if 'chinese' in voice.id.lower() or 'china' in voice.id.lower():
-                        engine.setProperty('voice', voice.id)
-                        break
-                engine.setProperty('rate', 150)  # 语速
+                # 用gTTS生成语音，服务器可以正常用
+                tts = gTTS(text=selected_story['content'], lang='zh-cn', slow=False)
                 
                 # 生成临时音频文件
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as fp:
                     temp_file = fp.name
                 
-                engine.save_to_file(selected_story['content'], temp_file)
-                engine.runAndWait()
+                tts.save(temp_file)
                 
                 # 播放音频
                 st.audio(temp_file, format='audio/mp3')
